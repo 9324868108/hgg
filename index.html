@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Xwork – Demo Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Deco + Modern font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Unica+One&display=swap" rel="stylesheet">
+  <style>
+    body {margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;background:#f4f8fb;color:#232d41;}
+    a {color:#2176ff;text-decoration:none;}
+    button,a {font-family:'Montserrat',sans-serif;}
+    .hidden {display:none !important;}
+    .xwork-logo {font-family:'Unica One',cursive;color:#2176ff;font-size:2rem;letter-spacing:2px;font-weight:700;text-shadow:0 2px 12px #cbe7ff90;}
+    .main-nav {
+      background:#fff;
+      padding:16px 0 12px 0;
+      box-shadow:0 2px 16px #2176ff08;
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:20;
+      padding-left:7vw;padding-right:7vw;
+    }
+    .nav-links {display:flex;gap:22px;font-size:1rem;align-items:center;}
+    .nav-link {font-weight:600;color:#174b9f;transition:color 0.2s;}
+    .nav-link.active, .nav-link:hover {color:#2176ff;}
+    .nav-btn {background:linear-gradient(90deg,#2176ff,#36b8fa 80%);color:#fff;padding:9px 20px;border-radius:7px;font-weight:700;border:none;cursor:pointer;}
+    .nav-user {font-size:1.09rem;color:#2176ff;font-weight:700;margin-left:14px;}
+    .nav-logout {color:#db3a34;font-weight:700;margin-left:18px;cursor:pointer;}
+    @media (max-width:900px) {.main-nav{flex-direction:column;gap:10px;padding-left:2vw;padding-right:2vw;}}
+    .x-section {max-width:560px;margin:40px auto;background:#fff;padding:38px 36px 34px 36px;border-radius:22px;box-shadow:0 8px 32px #2176ff14;display:none;}
+    .x-section.active {display:block;}
+    @media (max-width:600px) {.x-section{padding:18px 3vw;}.xwork-logo{font-size:1.3rem;}}
+    .chip {padding:7px 15px;border-radius:16px;background:#e7f0fa;color:#2176ff;border:2px solid transparent;font-size:1rem;cursor:pointer;user-select:none;transition:0.18s;}
+    .chip.selected {background:#2176ff;color:#fff;border-color:#2176ff;}
+    .team-member-chip {background:#f1f7fc;padding:6px 13px;border-radius:7px;display:flex;align-items:center;gap:8px;font-size:0.98rem;}
+    .remove-btn {color:#db3a34;background:none;border:none;cursor:pointer;font-size:1.1rem;}
+    .fs-card {background:#fff;border-radius:15px;box-shadow:0 4px 16px #22648810;padding:26px 18px 20px 18px;display:flex;flex-direction:column;align-items:flex-start;position:relative;min-height:210px;transition:box-shadow 0.2s,transform 0.17s;}
+    .fs-card:hover {box-shadow:0 8px 32px #2176ff22;transform:translateY(-3px) scale(1.01);}
+    .fs-avatar {width:54px;height:54px;border-radius:50%;object-fit:cover;border:2.5px solid #e7f0fa;background:#f1f6fa;margin-bottom:8px;}
+    .fs-name {font-weight:700;color:#174b9f;font-size:1.07rem;}
+    .fs-badges {margin:7px 0 4px 0;}
+    .fs-badge-ai {background:#36b8fa;color:#fff;border-radius:6px;padding:2px 9px;font-size:0.92rem;font-weight:800;margin-right:7px;}
+    .fs-badge-zero {background:#ffd700;color:#232d41;border-radius:6px;padding:2px 9px;font-size:0.92rem;font-weight:800;margin-right:7px;}
+    .fs-badge-top {background:#c6f7dd;color:#0e8c48;border-radius:6px;padding:2px 9px;font-size:0.92rem;font-weight:800;}
+    .fs-rating {color:#ffc700;font-weight:700;font-size:0.99rem;margin-bottom:2px;}
+    .fs-skills {margin-bottom:6px;}
+    .fs-skill {background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.93rem;padding:2px 7px;margin-right:4px;display:inline-block;}
+    .fs-bio {font-size:0.97rem;color:#4a5c76;margin-bottom:7px;}
+    .fs-actions {display:flex;gap:13px;margin-top:auto;width:100%;}
+    .fs-btn1,.fs-btn2 {padding:8px 18px;border-radius:7px;font-weight:700;font-size:0.97rem;cursor:pointer;transition:background 0.2s;border:none;}
+    .fs-btn1 {background:linear-gradient(90deg,#2176ff,#36b8fa 80%);color:#fff;}
+    .fs-btn1:hover {background:linear-gradient(90deg,#174b9f,#36b8fa 100%);}
+    .fs-btn2 {background:#f8fafc;color:#2176ff;border:1.5px solid #e7f0fa;}
+    .fs-btn2:hover {background:#e7f0fa;}
+    .fs-save-btn {background:none;border:none;cursor:pointer;position:absolute;top:18px;right:18px;font-size:1.2rem;color:#2176ff;opacity:0.6;transition:opacity 0.2s;}
+    .fs-save-btn.saved {color:#ff5064;opacity:1;}
+  </style>
+</head>
+<body>
+<!-- NAVIGATION -->
+  <div class="main-nav" id="mainNav">
+    <span class="xwork-logo" style="cursor:pointer;" onclick="showSection('home')">Xwork</span>
+    <div class="nav-links">
+      <a class="nav-link" href="#" onclick="showSection('home')">Home</a>
+      <a class="nav-link" href="#" onclick="showSection('freelancerSearch')">Find Talent</a>
+      <a class="nav-link" href="#" onclick="showSection('jobPost1')">Post a Job</a>
+      <a class="nav-link" href="#" onclick="showSection('messages')">Messages</a>
+      <a class="nav-link" href="#" onclick="showSection('clientDashboard')">Dashboard</a>
+      <a class="nav-link" href="#" onclick="showSection('billing')">Billing</a>
+      <span id="navUser" class="nav-user hidden"></span>
+      <span id="navLogout" class="nav-logout hidden" onclick="logout()">Logout</span>
+    </div>
+  </div>
+<!-- LOGIN/SIGNUP SECTION -->
+  <section class="x-section active" id="loginSection">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:9px 0 22px 0;font-size:1.35rem;font-weight:700;color:#232d41;">Sign in to your account</div>
+      <form id="loginForm" style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+        <input type="email" id="loginEmail" placeholder="Email" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        <div style="position:relative;width:100%;">
+          <input type="password" id="loginPwd" placeholder="Password" required style="width:100%;padding:12px 40px 12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <span style="position:absolute;right:13px;top:11px;cursor:pointer;color:#a2adc2;" onclick="togglePwd('loginPwd',this)">👁️</span>
+        </div>
+        <button type="submit" class="nav-btn" style="width:100%;margin-top:8px;">Sign In</button>
+      </form>
+      <div style="margin:18px 0 5px 0;font-size:0.99rem;color:#5e6b7a;">
+        New to Xwork?
+        <a href="#" style="color:#2176ff;font-weight:700;" onclick="toggleLoginSignup(true)">Create an account</a>
+      </div>
+    </div>
+  </section>
+  <section class="x-section" id="signupSection">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:9px 0 22px 0;font-size:1.35rem;font-weight:700;color:#232d41;">Create your account</div>
+      <form id="signupForm" style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+        <input type="text" id="signupName" placeholder="Full Name" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        <input type="email" id="signupEmail" placeholder="Email" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        <div style="position:relative;width:100%;">
+          <input type="password" id="signupPwd" placeholder="Password" required style="width:100%;padding:12px 40px 12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <span style="position:absolute;right:13px;top:11px;cursor:pointer;color:#a2adc2;" onclick="togglePwd('signupPwd',this)">👁️</span>
+        </div>
+        <label style="font-size:0.95rem;color:#5e6b7a;text-align:left;width:100%;"><input type="checkbox" id="signupTerms" required> I agree to the <a href="#" style="color:#2176ff;text-decoration:underline;">Terms & Conditions</a></label>
+        <button type="submit" class="nav-btn" style="width:100%;margin-top:8px;">Sign Up</button>
+      </form>
+      <div style="margin:18px 0 5px 0;font-size:0.99rem;color:#5e6b7a;">
+        Already have an account?
+        <a href="#" style="color:#2176ff;font-weight:700;" onclick="toggleLoginSignup(false)">Sign In</a>
+      </div>
+    </div>
+  </section>
+  <!-- ROLE SELECTION SECTION -->
+  <section class="x-section" id="roleSection">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:15px 0 14px 0;font-size:1.33rem;font-weight:700;color:#232d41;">What would you like to do?</div>
+      <div style="color:#2176ff;font-size:1.05rem;font-weight:600;margin-bottom:26px;">Shape Your Future, Your Way with Xwork.</div>
+      <div style="display:flex;gap:26px;justify-content:center;flex-wrap:wrap;">
+        <div style="background:linear-gradient(105deg,#e7f0fa 65%,#f6ece6 100%);border-radius:16px;box-shadow:0 4px 16px #22648813;padding:32px 26px 28px 26px;flex:1 1 200px;max-width:230px;min-width:200px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:.18s;" onclick="chooseRole('freelancer')">
+          <div style="font-size:2.5rem;margin-bottom:14px;color:#2176ff;">🧑‍💻</div>
+          <div style="font-size:1.14rem;font-weight:700;color:#174b9f;margin-bottom:7px;">Find Work</div>
+          <div style="font-size:0.98rem;color:#4a5c76;text-align:center;margin-bottom:13px;min-height:44px;">
+            Join as a freelancer, showcase your skills, <b>earn more</b>, and connect with top clients.
+            <span style="color:#36b8fa;font-weight:600;">No commission for first 6 months!</span>
+          </div>
+          <button class="nav-btn" style="margin-top:8px;">I'm a Freelancer</button>
+        </div>
+        <div style="background:linear-gradient(105deg,#e7f0fa 65%,#f6ece6 100%);border-radius:16px;box-shadow:0 4px 16px #22648813;padding:32px 26px 28px 26px;flex:1 1 200px;max-width:230px;min-width:200px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:.18s;position:relative;" onclick="chooseRole('client')">
+      <div style="font-size:2.5rem;margin-bottom:14px;color:#2176ff;">🌟</div>
+          <div style="font-size:1.14rem;font-weight:700;color:#174b9f;margin-bottom:7px;">Find Talent</div>
+          <div style="font-size:0.98rem;color:#4a5c76;text-align:center;margin-bottom:13px;min-height:44px;">
+            Post your project and get matched instantly with <b>vetted, top-rated freelancers</b>.
+          </div>
+          <button class="nav-btn" style="margin-top:8px;">I'm Hiring</button>
+          <div style="display:none;position:absolute;left:110%;top:0;background:#fff;border:1.5px solid #e7f0fa;border-radius:12px;box-shadow:0 6px 24px #2176ff15;padding:14px 18px 9px 18px;min-width:170px;z-index:12;" class="micro-carousel">
+            <div style="font-size:1.01rem;font-weight:700;color:#2176ff;margin-bottom:9px;text-align:left;">Top Freelancers</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" style="width:32px;height:32px;border-radius:50%;border:1.5px solid #e7f0fa;">
+              <div><div style="font-weight:600;color:#174b9f;font-size:0.97rem;">Samir P.</div><div style="font-size:0.92rem;color:#4a5c76;">UI/UX Designer</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+              <img src="https://randomuser.me/api/portraits/women/45.jpg" style="width:32px;height:32px;border-radius:50%;border:1.5px solid #e7f0fa;">
+              <div><div style="font-weight:600;color:#174b9f;font-size:0.97rem;">Priya S.</div><div style="font-size:0.92rem;color:#4a5c76;">Web Developer</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px;color:#a2adc2;font-size:0.99rem;text-align:center;">
+        <span style="color:#2176ff;font-weight:600;">Xwork is the only platform</span> with no commission for freelancers in the first 6 months.<br>
+        <span style="font-size:0.91rem;color:#36b8fa;">Start now and experience the difference.</span>
+      </div>
+    </div>
+  </section>
+  <!-- ONBOARDING STEP 1: Account Setup -->
+  <section class="x-section" id="onboardStep1">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Step 1: Account Setup</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Let's get started. Enter basic details to set up your Xwork account.</div>
+    </div>
+    <form id="onboardStep1Form" autocomplete="off" style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <label for="ob1Name" style="font-weight:600;">Full Name / Company Name</label>
+        <input type="text" id="ob1Name" placeholder="Enter your name or company" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label for="ob1Email" style="font-weight:600;">Email Address</label>
+        <input type="email" id="ob1Email" placeholder="Enter your email" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label for="ob1Pwd" style="font-weight:600;">Create Password</label>
+        <div style="position:relative;">
+          <input type="password" id="ob1Pwd" placeholder="Create a password" required style="width:100%;padding:12px 40px 12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <span style="position:absolute;right:13px;top:11px;cursor:pointer;color:#a2adc2;" onclick="togglePwd('ob1Pwd',this)">👁️</span>
+        </div>
+      </div>
+      <div>
+        <label style="font-weight:600;">Account Type</label>
+        <div style="display:flex;gap:20px;margin-top:5px;">
+          <label style="display:flex;align-items:center;gap:6px;font-weight:600;color:#2176ff;cursor:pointer;">
+            <input type="radio" name="ob1Type" value="Individual" required style="accent-color:#2176ff;"> Individual
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-weight:600;color:#2176ff;cursor:pointer;">
+            <input type="radio" name="ob1Type" value="Company" required style="accent-color:#2176ff;"> Company
+          </label>
+        </div>
+      </div>
+      <button type="submit" class="nav-btn" style="margin-top:4px;">Next</button>
+    </form>
+  </section>
+  <!-- ONBOARDING STEP 2: Profile Details -->
+  <section class="x-section" id="onboardStep2">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Step 2: Profile Details</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Set up your public profile. These details help you stand out and build trust.</div>
+    </div>
+    <form id="onboardStep2Form" autocomplete="off" style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <label for="ob2DisplayName" style="font-weight:600;">Display Name <span style="color:#b9c0c9;font-weight:400;">(public)</span></label>
+        <input type="text" id="ob2DisplayName" placeholder="e.g. Jane Doe or Acme Corp" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label for="ob2Company" style="font-weight:600;">Company Name <span style="color:#b9c0c9;font-weight:400;">(if applicable)</span></label>
+        <input type="text" id="ob2Company" placeholder="e.g. Acme Corporation" style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label for="ob2Location" style="font-weight:600;">Location</label>
+        <select id="ob2Location" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <option value="">Select your country</option>
+          <option value="India">India</option>
+          <option value="United States">United States</option>
+          <option value="United Kingdom">United Kingdom</option>
+          <option value="Germany">Germany</option>
+          <option value="Australia">Australia</option>
+          <option value="Canada">Canada</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label for="ob2Industry" style="font-weight:600;">Industry</label>
+        <select id="ob2Industry" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <option value="">Select industry</option>
+          <option value="IT & Software">IT & Software</option>
+          <option value="Design & Creative">Design & Creative</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Finance & Accounting">Finance & Accounting</option>
+          <option value="Writing & Translation">Writing & Translation</option>
+          <option value="Legal">Legal</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label for="ob2Bio" style="font-weight:600;">Short Bio / About</label>
+        <textarea id="ob2Bio" rows="3" maxlength="200" placeholder="Briefly introduce yourself or your company (max 200 chars)" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;resize:vertical;min-height:60px;"></textarea>
+      </div>
+      <div>
+        <label for="ob2Logo" style="font-weight:600;">Logo (optional)</label>
+        <input type="file" id="ob2Logo" accept="image/*" style="width:100%;margin-bottom:7px;">
+        <img id="ob2LogoPreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo preview" style="width:42px;height:42px;border-radius:50%;object-fit:cover;background:#f1f6fa;border:1.5px solid #e6eaf5;">
+      </div>
+      <button type="submit" class="nav-btn" style="margin-top:4px;">Next</button>
+    </form>
+  </section>
+<!-- ONBOARDING STEP 3: Project Requirements -->
+  <section class="x-section" id="onboardStep3">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Step 3: Project Requirements</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Describe your project so freelancers understand your needs clearly.</div>
+    </div>
+    <form id="onboardStep3Form" autocomplete="off" style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <label for="ob3Title" style="font-weight:600;">Project Title</label>
+        <input type="text" id="ob3Title" placeholder="e.g. Mobile App UI Design" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label for="ob3Desc" style="font-weight:600;">Project Description</label>
+        <textarea id="ob3Desc" rows="4" maxlength="600" placeholder="Describe the project scope, deliverables, expectations, etc." required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;resize:vertical;min-height:70px;"></textarea>
+      </div>
+      <div>
+        <label style="font-weight:600;">Required Skills</label>
+        <div id="ob3SkillsChips" style="display:flex;flex-wrap:wrap;gap:8px;margin:7px 0;"></div>
+        <input type="text" id="ob3SkillInput" placeholder="Add a skill and press Enter" style="width:100%;padding:9px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:0.99rem;background:#f8fafc;">
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;">
+          <label for="ob3Budget" style="font-weight:600;">Budget ($)</label>
+          <input type="number" min="1" id="ob3Budget" placeholder="Amount" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        </div>
+        <div style="flex:1;">
+          <label for="ob3Timeline" style="font-weight:600;">Timeline</label>
+          <input type="text" id="ob3Timeline" placeholder="e.g. 2 weeks, 1 month" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        </div>
+      </div>
+      <div>
+        <label for="ob3Attachments" style="font-weight:600;">Attachments (optional)</label>
+        <input type="file" id="ob3Attachments" multiple>
+        <div id="ob3FileList" style="font-size:0.97rem;color:#2176ff;margin:7px 0 0 0;"></div>
+      </div>
+      <button type="submit" class="nav-btn" style="margin-top:4px;">Next</button>
+    </form>
+  </section>
+  <!-- ONBOARDING STEP 4: Collaboration Preferences -->
+  <section class="x-section" id="onboardStep4">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Step 4: Collaboration Preferences</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Tell us how you want to collaborate for a seamless project experience.</div>
+    </div>
+    <form id="onboardStep4Form" autocomplete="off" style="display:flex;flex-direction:column;gap:18px;">
+      <div>
+        <label style="font-weight:600;">Preferred Communication Channels</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin:7px 0;" id="ob4CommChannels">
+          <span class="chip" data-value="Platform Chat" onclick="toggleChip(this)">Platform Chat</span>
+          <span class="chip" data-value="Email" onclick="toggleChip(this)">Email</span>
+          <span class="chip" data-value="Video Call" onclick="toggleChip(this)">Video Call</span>
+          <span class="chip" data-value="Slack" onclick="toggleChip(this)">Slack</span>
+          <span class="chip" data-value="WhatsApp" onclick="toggleChip(this)">WhatsApp</span>
+        </div>
+      </div>
+      <div>
+        <label for="ob4Timezone" style="font-weight:600;">Time Zone</label>
+        <select id="ob4Timezone" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <option value="">Select your time zone</option>
+          <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+          <option value="Europe/London">Europe/London (GMT)</option>
+          <option value="America/New_York">America/New_York (EST)</option>
+          <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+          <option value="Europe/Berlin">Europe/Berlin (CET)</option>
+        </select>
+      </div>
+      <div>
+        <label for="ob4Hours" style="font-weight:600;">Usual Working Hours</label>
+        <input type="text" id="ob4Hours" placeholder="e.g. 10am – 7pm (IST)" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+      </div>
+      <div>
+        <label style="font-weight:600;">Project Management Tools</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin:7px 0;" id="ob4PMTools">
+          <span class="chip" data-value="Trello" onclick="toggleChip(this)">Trello</span>
+          <span class="chip" data-value="Asana" onclick="toggleChip(this)">Asana</span>
+          <span class="chip" data-value="Jira" onclick="toggleChip(this)">Jira</span>
+          <span class="chip" data-value="ClickUp" onclick="toggleChip(this)">ClickUp</span>
+          <span class="chip" data-value="Other" onclick="toggleChip(this)">Other</span>
+        </div>
+      </div>
+      <div>
+        <label style="font-weight:600;">Collaboration Style</label>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:7px;">
+          <label><input type="radio" name="ob4Style" value="Structured" required style="accent-color:#2176ff;"> Structured</label>
+          <label><input type="radio" name="ob4Style" value="Flexible" required style="accent-color:#2176ff;"> Flexible</label>
+        </div>
+        <span style="color:#5e6b7a;font-size:0.95rem;">Structured: Milestones, reports. Flexible: Informal updates.</span>
+      </div>
+      <div>
+        <label style="font-weight:600;">Add Team Members (optional)</label>
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
+          <input type="email" id="ob4TeamEmail" placeholder="Invite by email" style="flex:1;padding:9px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:0.99rem;">
+          <button type="button" class="nav-btn" style="padding:7px 14px;font-size:0.97rem;" onclick="addTeamMember()">Add</button>
+        </div>
+        <div id="ob4TeamMembers" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+      </div>
+      <div>
+        <label style="font-weight:600;">Interview & Onboarding Preferences</label>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:6px;">
+          <label><input type="checkbox" id="ob4InterviewLive" value="Live Video"> Live Video</label>
+          <label><input type="checkbox" id="ob4InterviewTest" value="Test Task"> Test Task</label>
+          <label><input type="checkbox" id="ob4NDA" value="Required"> NDA</label>
+          <label><input type="checkbox" id="ob4OnboardingDocs" value="Docs"> Docs Needed</label>
+        </div>
+      </div>
+      <button type="submit" class="nav-btn" style="margin-top:4px;">Next</button>
+    </form>
+  </section>
+<!-- ONBOARDING STEP 5: Review & Confirm -->
+  <section class="x-section" id="onboardStep5">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Step 5: Review &amp; Confirm</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Please review your details before finishing onboarding.</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:22px 18px 16px 18px;margin-bottom:18px;">
+      <div style="font-weight:700;color:#2176ff;font-size:1.06rem;">Your Information</div>
+      <ul id="onboardReviewList" style="list-style:none;margin:0;padding:0;font-size:1rem;color:#243548;"></ul>
+    </div>
+    <form id="onboardStep5Form" style="display:flex;flex-direction:column;gap:12px;">
+      <button type="button" class="nav-btn" style="background:#f4f8fb;color:#2176ff;border:2px solid #e7f0fa;" onclick="goToOnboardingEdit()">Back</button>
+      <button type="submit" class="nav-btn">Finish Onboarding</button>
+    </form>
+    <div id="onboardFinishMsg" style="display:none;margin-top:20px;color:#2ca24c;font-size:1.15rem;font-weight:600;text-align:center;background:#ecfbef;border-radius:8px;padding:16px 0;">
+      🎉 Onboarding complete! Welcome to Xwork.
+    </div>
+  </section>
+  <!-- FREELANCER DASHBOARD SECTION -->
+  <section class="x-section" id="freelancerDashboard">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:13px 0 5px 0;font-size:1.23rem;font-weight:700;color:#2176ff;">Freelancer Dashboard</div>
+      <div style="color:#5e6b7a;font-size:1.01rem;margin-bottom:16px;">Welcome back, <span id="fdName">Samir</span>! Here’s your status at a glance.</div>
+    </div>
+    <div style="background:linear-gradient(90deg,#2176ff 60%,#36b8fa 100%);color:#fff;border-radius:12px;padding:13px 20px;font-size:1.05rem;font-weight:600;box-shadow:0 2px 14px #2176ff18;display:flex;align-items:center;gap:12px;margin-bottom:17px;">
+      <span style="font-size:1.23rem;">⭐</span>
+      No commission on your earnings for your first 6 months! (Only on Xwork)
+    </div>
+    <div style="display:flex;gap:26px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:250px;">
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;margin-bottom:18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Earnings Overview</div>
+          <div style="display:flex;gap:18px;">
+            <div style="background:#fff;border-radius:10px;box-shadow:0 1px 5px #2176ff0d;padding:12px 14px;text-align:center;flex:1;">
+              <div style="font-size:0.89rem;color:#4a5c76;margin-bottom:2px;">This Month</div>
+              <div style="font-size:1.19rem;font-weight:700;color:#174b9f;">$2,100</div>
+            </div>
+            <div style="background:#fff;border-radius:10px;box-shadow:0 1px 5px #2176ff0d;padding:12px 14px;text-align:center;flex:1;">
+              <div style="font-size:0.89rem;color:#4a5c76;margin-bottom:2px;">Total</div>
+              <div style="font-size:1.19rem;font-weight:700;color:#174b9f;">$12,750</div>
+            </div>
+          </div>
+          <button class="nav-btn" style="margin-top:10px;padding:8px 26px;" onclick="alert('Withdraw initiated!')">Withdraw</button>
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;margin-bottom:18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">My Proposals</div>
+          <ul style="list-style:none;margin:0;padding:0;">
+            <li style="margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e6eaf5;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:600;color:#2176ff;">Mobile App UI Design</span>
+              <span style="background:#ffe49e;color:#9a8007;border-radius:6px;padding:3px 11px;font-size:0.95rem;font-weight:600;">Pending</span>
+            </li>
+            <li style="margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e6eaf5;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:600;color:#2176ff;">E-commerce Website Build</span>
+              <span style="background:#c6f7dd;color:#0e8c48;border-radius:6px;padding:3px 11px;font-size:0.95rem;font-weight:600;">Accepted</span>
+            </li>
+            <li style="margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e6eaf5;display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-weight:600;color:#2176ff;">Brand Logo Creation</span>
+              <span style="background:#ffd3d3;color:#ba1a1a;border-radius:6px;padding:3px 11px;font-size:0.95rem;font-weight:600;">Rejected</span>
+            </li>
+          </ul>
+          <button class="nav-btn" style="margin-top:7px;padding:8px 22px;background:#2176ff;" onclick="alert('Start a new proposal!')">Submit New Proposal</button>
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Your Progress</div>
+          <div style="display:flex;gap:11px;align-items:flex-end;flex-wrap:wrap;margin-bottom:7px;">
+            <span style="background:#fff;border-radius:8px;padding:8px 13px;box-shadow:0 1px 5px #2176ff0d;display:flex;align-items:center;gap:7px;font-size:1.01rem;font-weight:600;color:#2176ff;"><span style="font-size:1.2rem;">🏆</span>Top Rated</span>
+            <span style="background:#fff;border-radius:8px;padding:8px 13px;box-shadow:0 1px 5px #2176ff0d;display:flex;align-items:center;gap:7px;font-size:1.01rem;font-weight:600;color:#2176ff;"><span style="font-size:1.2rem;">🔒</span>Verified</span>
+            <span style="background:#fff;border-radius:8px;padding:8px 13px;box-shadow:0 1px 5px #2176ff0d;display:flex;align-items:center;gap:7px;font-size:1.01rem;font-weight:600;color:#2176ff;"><span style="font-size:1.2rem;">🔥</span>Streak: 5 months</span>
+          </div>
+          <div style="width:100%;background:#e5ecf7;border-radius:8px;height:8px;margin-top:9px;margin-bottom:2px;overflow:hidden;">
+            <div style="background:linear-gradient(90deg,#2176ff,#36b8fa 90%);height:100%;width:65%;transition:width 0.3s;"></div>
+          </div>
+          <span style="font-size:0.95rem;color:#4a5c76;">Level up to "Elite Freelancer" – Complete 2 more projects!</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:250px;">
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;margin-bottom:18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Recommended Jobs For You</div>
+          <div style="background:#fff;border-radius:9px;box-shadow:0 1px 5px #2176ff0d;padding:13px 13px 9px 13px;margin-bottom:12px;">
+            <div style="font-size:1.01rem;font-weight:600;color:#174b9f;margin-bottom:2px;">Fintech App Dashboard UI</div>
+            <div style="font-size:0.97rem;color:#5e6b7a;margin-bottom:3px;">Design a modern dashboard for a fintech startup. Figma/Adobe XD preferred.</div>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;margin-right:5px;">UI/UX</span>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;">Fintech</span>
+            <button class="nav-btn" style="padding:6px 16px;margin-top:4px;" onclick="alert('Quick apply to this job!')">Quick Apply</button>
+          </div>
+          <div style="background:#fff;border-radius:9px;box-shadow:0 1px 5px #2176ff0d;padding:13px 13px 9px 13px;margin-bottom:12px;">
+            <div style="font-size:1.01rem;font-weight:600;color:#174b9f;margin-bottom:2px;">Blog Website Revamp</div>
+            <div style="font-size:0.97rem;color:#5e6b7a;margin-bottom:3px;">Redesign and optimize an existing WordPress blog for better readability and SEO.</div>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;margin-right:5px;">Web Design</span>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;">SEO</span>
+            <button class="nav-btn" style="padding:6px 16px;margin-top:4px;" onclick="alert('Quick apply to this job!')">Quick Apply</button>
+          </div>
+          <div style="background:#fff;border-radius:9px;box-shadow:0 1px 5px #2176ff0d;padding:13px 13px 9px 13px;margin-bottom:12px;">
+            <div style="font-size:1.01rem;font-weight:600;color:#174b9f;margin-bottom:2px;">Brand Identity Pack</div>
+            <div style="font-size:0.97rem;color:#5e6b7a;margin-bottom:3px;">Create a cohesive brand identity for a new eco-friendly product line.</div>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;margin-right:5px;">Branding</span>
+            <span style="background:#e7f0fa;color:#2176ff;border-radius:6px;font-size:0.92rem;padding:2px 7px;">Graphic Design</span>
+            <button class="nav-btn" style="padding:6px 16px;margin-top:4px;" onclick="alert('Quick apply to this job!')">Quick Apply</button>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:9px;box-shadow:0 1px 5px #2176ff0d;padding:13px 14px 9px 14px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:9px;font-size:1.08rem;color:#2176ff;font-weight:700;margin-bottom:5px;">
+            Messages <span style="width:10px;height:10px;background:#ff5064;border-radius:50%;display:inline-block;margin-left:4px;"></span>
+          </div>
+          <ul style="list-style:none;margin:0;padding:0;">
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Priya S.:</b> Can you share more UI samples?</li>
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Acme Corp:</b> Congratulations, project approved!</li>
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Support:</b> Your ID verification is complete.</li>
+          </ul>
+          <a href="#" style="color:#2176ff;font-size:0.97rem;font-weight:600;text-decoration:none;">View All Messages</a>
+        </div>
+      </div>
+    </div>
+  </section>
+<!-- CLIENT DASHBOARD SECTION -->
+  <section class="x-section" id="clientDashboard">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:13px 0 5px 0;font-size:1.23rem;font-weight:700;color:#2176ff;">Client Dashboard</div>
+      <div style="color:#5e6b7a;font-size:1.01rem;margin-bottom:16px;">Welcome back, <span id="cdName">Rahul</span>! Here’s your hiring activity and shortcuts.</div>
+    </div>
+    <div style="display:flex;gap:26px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:250px;">
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;margin-bottom:18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Active Jobs</div>
+          <ul style="list-style:none;margin:0;padding:0;">
+            <li style="margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid #e6eaf5;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <span style="font-weight:600;color:#2176ff;">App UI Design</span>
+              <span style="background:#c6f7dd;color:#0e8c48;border-radius:6px;padding:3px 11px;font-size:0.95rem;font-weight:600;">Open</span>
+              <div style="display:flex;gap:6px;">
+                <button class="nav-btn" style="padding:4px 13px;font-size:0.97rem;" onclick="alert('View proposals')">View Proposals</button>
+                <button class="nav-btn" style="padding:4px 13px;font-size:0.97rem;" onclick="alert('Close job')">Close</button>
+              </div>
+            </li>
+            <li style="margin-bottom:12px;padding-bottom:7px;border-bottom:1px solid #e6eaf5;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+              <span style="font-weight:600;color:#2176ff;">SEO Blog Content</span>
+              <span style="background:#ffe49e;color:#9a8007;border-radius:6px;padding:3px 11px;font-size:0.95rem;font-weight:600;">In Progress</span>
+              <div style="display:flex;gap:6px;">
+                <button class="nav-btn" style="padding:4px 13px;font-size:0.97rem;" onclick="alert('View proposals')">View Proposals</button>
+                <button class="nav-btn" style="padding:4px 13px;font-size:0.97rem;" onclick="alert('Mark Complete')">Mark Complete</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Top Applicants</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="background:#fff;border-radius:10px;box-shadow:0 1px 6px #2176ff0a;padding:10px 9px 8px 9px;display:flex;flex-direction:column;align-items:center;min-width:90px;max-width:100px;">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid #e7f0fa;">
+              <div style="font-weight:600;color:#174b9f;font-size:0.98rem;">Samir P.</div>
+              <div style="background:#36b8fa;color:#fff;border-radius:6px;padding:2px 7px;font-size:0.89rem;font-weight:800;margin-top:3px;">AI Top Match</div>
+            </div>
+            <div style="background:#fff;border-radius:10px;box-shadow:0 1px 6px #2176ff0a;padding:10px 9px 8px 9px;display:flex;flex-direction:column;align-items:center;min-width:90px;max-width:100px;">
+              <img src="https://randomuser.me/api/portraits/women/45.jpg" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid #e7f0fa;">
+              <div style="font-weight:600;color:#174b9f;font-size:0.98rem;">Priya S.</div>
+            </div>
+            <div style="background:#fff;border-radius:10px;box-shadow:0 1px 6px #2176ff0a;padding:10px 9px 8px 9px;display:flex;flex-direction:column;align-items:center;min-width:90px;max-width:100px;">
+              <img src="https://randomuser.me/api/portraits/women/60.jpg" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid #e7f0fa;">
+              <div style="font-weight:600;color:#174b9f;font-size:0.98rem;">Mia L.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:250px;">
+        <div style="background:#fff;border-radius:9px;box-shadow:0 1px 5px #2176ff0d;padding:13px 14px 9px 14px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:9px;font-size:1.08rem;color:#2176ff;font-weight:700;margin-bottom:5px;">
+            Messages <span style="width:10px;height:10px;background:#ff5064;border-radius:50%;display:inline-block;margin-left:4px;"></span>
+          </div>
+          <ul style="list-style:none;margin:0;padding:0;">
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Samir P.:</b> Shared the latest UI files.</li>
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Priya S.:</b> Submitted blog writing sample.</li>
+            <li style="font-size:0.97rem;color:#232d41;margin-bottom:6px;padding-left:2px;"><b>Support:</b> Your subscription is activated.</li>
+</ul>
+          <a href="#" style="color:#2176ff;font-size:0.97rem;font-weight:600;text-decoration:none;">View All Messages</a>
+        </div>
+        <div style="background:#fff;border-radius:10px;box-shadow:0 1px 5px #2176ff0d;padding:18px 14px 9px 14px;margin-bottom:12px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.03rem;margin-bottom:7px;">Subscription & Billing</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.98rem;">
+            <span>Plan:</span><span>Pro</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.98rem;">
+            <span>Next Payment:</span><span>June 15, 2025</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:0.98rem;">
+            <span>Total Spent:</span><span>$1,480</span>
+          </div>
+          <button class="nav-btn" style="margin-top:8px;padding:4px 13px;font-size:0.97rem;" onclick="alert('Go to Subscription Settings!')">Manage Plan</button>
+        </div>
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Loyalty Rewards</div>
+          <div style="font-size:0.97rem;color:#36b8fa;font-weight:600;">Earn $50 credit after 3 more hires!</div>
+          <div style="width:100%;background:#e5ecf7;border-radius:8px;height:8px;margin-top:9px;margin-bottom:2px;overflow:hidden;">
+            <div style="background:linear-gradient(90deg,#2176ff,#36b8fa 90%);height:100%;width:62%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+        <div style="margin-top:9px;">
+          <button class="nav-btn" style="padding:9px 18px;background:#f8fafc;color:#2176ff;border-radius:7px;font-weight:600;font-size:1rem;border:2px solid #e7f0fa;margin-right:9px;margin-bottom:8px;cursor:pointer;transition:background 0.2s;" onclick="alert('Go to Job Posting Flow!')">+ Post Job</button>
+          <button class="nav-btn" style="padding:9px 18px;background:#f8fafc;color:#2176ff;border-radius:7px;font-weight:600;font-size:1rem;border:2px solid #e7f0fa;margin-right:9px;margin-bottom:8px;cursor:pointer;transition:background 0.2s;" onclick="alert('Rehire last freelancer!')">Rehire</button>
+          <button class="nav-btn" style="padding:9px 18px;background:#f8fafc;color:#2176ff;border-radius:7px;font-weight:600;font-size:1rem;border:2px solid #e7f0fa;margin-right:9px;margin-bottom:8px;cursor:pointer;transition:background 0.2s;" onclick="alert('Invite Freelancer!')">Invite Freelancer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- FREELANCER SEARCH/DISCOVERY SECTION -->
+  <section class="x-section" id="freelancerSearch">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:13px 0 9px 0;font-size:1.23rem;font-weight:700;color:#2176ff;">Find Top Freelancers</div>
+      <form onsubmit="searchFreelancers();return false;" style="max-width:420px;margin:0 auto 16px auto;display:flex;align-items:center;">
+        <input type="text" id="fsSearchInput" placeholder="Search skills, name, or keywords…" style="flex:1;padding:13px 13px;border-radius:8px 0 0 8px;border:1.7px solid #2176ff;font-size:1.02rem;background:#fff;outline:none;border-right:none;">
+        <button type="submit" class="nav-btn" style="border-radius:0 8px 8px 0;padding:13px 30px;">Search</button>
+      </form>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:0 0 15px 0;">
+        <select id="fsSkill" style="padding:7px 14px;border-radius:7px;border:1.5px solid #d3e1ef;background:#f8fafc;font-size:0.99rem;color:#2176ff;">
+          <option value="">All Skills</option>
+          <option>UI/UX Design</option>
+          <option>Web Development</option>
+          <option>Mobile Apps</option>
+          <option>Content Writing</option>
+          <option>SEO</option>
+          <option>Branding</option>
+        </select>
+        <select id="fsLocation" style="padding:7px 14px;border-radius:7px;border:1.5px solid #d3e1ef;background:#f8fafc;font-size:0.99rem;color:#2176ff;">
+          <option value="">All Locations</option>
+          <option>India</option>
+          <option>USA</option>
+          <option>UK</option>
+          <option>Germany</option>
+        </select>
+        <select id="fsRating" style="padding:7px 14px;border-radius:7px;border:1.5px solid #d3e1ef;background:#f8fafc;font-size:0.99rem;color:#2176ff;">
+          <option value="">All Ratings</option>
+          <option value="5">5★</option>
+          <option value="4">4★ & up</option>
+          <option value="3">3★ & up</option>
+        </select>
+        <select id="fsSort" style="padding:7px 14px;border-radius:7px;border:1.5px solid #d3e1ef;background:#f8fafc;font-size:0.99rem;color:#2176ff;">
+          <option value="best">Best Match</option>
+          <option value="top">Top Rated</option>
+          <option value="low">Price: Low-High</option>
+          <option value="recent">Most Recent</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px;margin-top:12px;" id="fsResults"></div>
+  </section>
+  <!-- JOB POSTING STEP 1: Job Basics -->
+  <section class="x-section" id="jobPost1">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:16px 0 6px 0;font-size:1.19rem;font-weight:700;color:#232d41;">Post a Job – Step 1: Job Basics</div>
+      <div style="color:#5e6b7a;margin-bottom:24px;">Start by sharing your job’s title and main category.<br>Let Xwork AI help you craft the perfect job post!</div>
+    </div>
+    <form id="jobPost1Form" autocomplete="off" style="display:flex;flex-direction:column;gap:19px;">
+      <div>
+        <label for="jpTitle" style="font-weight:600;">Job Title</label>
+        <input type="text" id="jpTitle" placeholder="e.g. Build a Fintech App UI" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+        <button type="button" class="nav-btn" style="margin-top:5px;padding:7px 18px;font-size:0.98rem;" onclick="jpAISuggestTitle()">AI Suggest Title</button>
+      </div>
+      <div>
+        <label for="jpCategory" style="font-weight:600;">Main Category</label>
+        <select id="jpCategory" required style="width:100%;padding:12px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+          <option value="">Select...</option>
+          <option>Design & Creative</option>
+          <option>Web & App Development</option>
+          <option>Writing & Translation</option>
+          <option>Marketing</option>
+          <option>Finance & Accounting</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <button type="submit" class="nav-btn" style="margin-top:18px;">Next</button>
+    </form>
+  </section>
+  <!-- FREELANCER PROFILE SECTION -->
+  <section class="x-section" id="freelancerProfile">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:26px;flex-wrap:wrap;margin:18px 0 16px 0;">
+      <img src="https://randomuser.me/api/portraits/men/32.jpg" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #2176ff22;background:#f1f6fa;">
+      <div style="flex:1;">
+        <div style="font-size:1.6rem;font-weight:800;color:#174b9f;margin-bottom:6px;">Samir Patel</div>
+        <div style="font-size:1.1rem;color:#2176ff;font-weight:600;">Senior UI/UX Designer & Product Consultant</div>
+        <div style="font-size:1.01rem;color:#5e6b7a;margin-bottom:7px;">Mumbai, India · Available Now</div>
+        <div style="margin-bottom:8px;">
+          <span style="background:#36b8fa;color:#fff;border-radius:6px;padding:2px 10px;font-size:0.97rem;font-weight:800;margin-right:7px;">AI Top Match</span>
+          <span style="background:#ffd700;color:#232d41;border-radius:6px;padding:2px 10px;font-size:0.97rem;font-weight:800;margin-right:7px;">0% Commission</span>
+          <span style="background:#c6f7dd;color:#0e8c48;border-radius:6px;padding:2px 10px;font-size:0.97rem;font-weight:800;">Top Rated</span>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:8px;">
+          <button class="nav-btn" onclick="alert('Invite sent!')">Invite to Job</button>
+          <button class="nav-btn" style="background:#f8fafc;color:#2176ff;border:2px solid #e7f0fa;" onclick="alert('Saved!')">Save</button>
+          <button class="nav-btn" style="background:#f8fafc;color:#2176ff;border:2px solid #e7f0fa;" onclick="alert('Link copied!')">Share Profile</button>
+        </div>
+        <div style="font-size:0.98rem;color:#36b8fa;font-weight:600;margin-top:8px;">Public Profile: <a href="#">xwork.com/profile/samir-patel</a></div>
+      </div>
+    </div>
+    <div style="margin:23px 0 17px 0;display:flex;gap:30px;align-items:center;flex-wrap:wrap;">
+      <div>
+        <span style="font-size:2.1rem;font-weight:700;color:#ffc700;">5.0</span>
+        <span style="font-size:1.2rem;">★★★★★</span>
+        <span style="font-size:0.98rem;color:#5e6b7a;">(38 reviews)</span>
+</div>
+      <div style="font-size:1rem;color:#2176ff;font-weight:700;">98% Job Success</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:17px;">
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">UI/UX Design</span>
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">Figma</span>
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">Mobile Apps</span>
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">Branding</span>
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">Design Systems</span>
+      <span style="background:#e7f0fa;color:#2176ff;border-radius:7px;font-size:1rem;padding:6px 15px;">Prototyping</span>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.11rem;color:#2176ff;font-weight:700;margin-bottom:6px;">About</div>
+      <div style="font-size:1.01rem;color:#243548;">
+        Award-winning designer with 8+ years building engaging mobile and web experiences for startups and global brands. Passionate about human-centered design and rapid prototyping. Let's transform your ideas into beautiful products!
+      </div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.09rem;color:#174b9f;font-weight:700;margin-bottom:6px;">Portfolio</div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:13px;">
+        <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=300&q=80" style="width:110px;height:80px;object-fit:cover;border-radius:9px;box-shadow:0 1px 8px #2176ff1c;">
+        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=80" style="width:110px;height:80px;object-fit:cover;border-radius:9px;box-shadow:0 1px 8px #2176ff1c;">
+        <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=300&q=80" style="width:110px;height:80px;object-fit:cover;border-radius:9px;box-shadow:0 1px 8px #2176ff1c;">
+      </div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.09rem;color:#174b9f;font-weight:700;margin-bottom:6px;">Experience</div>
+      <ul style="list-style:none;margin:0;padding:0;">
+        <li style="margin-bottom:8px;"><b>Lead Product Designer</b> – Acme Fintech (2021–Present)</li>
+        <li style="margin-bottom:8px;"><b>UI/UX Designer</b> – NextGen Apps (2017–2021)</li>
+      </ul>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.09rem;color:#174b9f;font-weight:700;margin-bottom:6px;">Education</div>
+      <ul style="list-style:none;margin:0;padding:0;">
+        <li style="margin-bottom:8px;">B.Des, Industrial Design – IIT Bombay</li>
+      </ul>
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:1.09rem;color:#174b9f;font-weight:700;margin-bottom:6px;">Certifications</div>
+      <ul style="list-style:none;margin:0;padding:0;">
+        <li style="margin-bottom:8px;">Certified UX Professional (Interaction Design Foundation)</li>
+      </ul>
+    </div>
+    <div>
+      <div style="font-size:1.09rem;color:#174b9f;font-weight:700;margin-bottom:6px;">Client Reviews</div>
+      <ul style="list-style:none;margin:0;padding:0;">
+        <li style="margin-bottom:11px;">
+          <div style="font-size:1rem;font-weight:700;color:#2176ff;margin-bottom:2px;">"Samir delivered an outstanding dashboard UI ahead of schedule!"</div>
+          <div style="font-size:0.97rem;color:#243548;">— Rahul M. (March 2025)</div>
+        </li>
+        <li style="margin-bottom:11px;">
+          <div style="font-size:1rem;font-weight:700;color:#2176ff;margin-bottom:2px;">"Superb designer, great communication. Highly recommend."</div>
+          <div style="font-size:0.97rem;color:#243548;">— Emily W. (Feb 2025)</div>
+        </li>
+      </ul>
+    </div>
+  </section>
+  <!-- MESSAGING / CHAT SECTION -->
+  <section class="x-section" id="messages">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:13px 0 9px 0;font-size:1.23rem;font-weight:700;color:#2176ff;">Messages</div>
+    </div>
+    <div style="display:flex;gap:22px;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;">
+        <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;margin-bottom:18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Recent Chats</div>
+          <ul style="list-style:none;margin:0;padding:0;" id="msgChatList"></ul>
+        </div>
+      </div>
+      <div style="flex:2;min-width:260px;">
+        <div style="background:#fff;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:18px 18px 14px 18px;">
+          <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;" id="msgChatHeader">Select a chat</div>
+          <div id="msgChatWindow" style="min-height:120px;max-height:220px;overflow-y:auto;margin-bottom:15px;"></div>
+          <form id="msgChatForm" style="display:flex;gap:8px;align-items:center;" autocomplete="off" onsubmit="return false;">
+            <input type="text" id="msgInput" placeholder="Type a message…" style="flex:1;padding:8px 13px;border-radius:8px;border:1.5px solid #d3e1ef;font-size:1rem;">
+            <button class="nav-btn" style="padding:8px 18px;" onclick="sendMessage()">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- BILLING / SUBSCRIPTION SECTION -->
+  <section class="x-section" id="billing">
+    <div style="text-align:center;">
+      <span class="xwork-logo">Xwork</span>
+      <div style="margin:13px 0 9px 0;font-size:1.23rem;font-weight:700;color:#2176ff;">Subscription & Billing</div>
+    </div>
+    <div style="background:#f8fafc;border-radius:14px;box-shadow:0 2px 10px #2176ff13;padding:22px 18px 16px 18px;margin-bottom:18px;">
+      <div style="font-weight:700;color:#2176ff;font-size:1.06rem;">Your Current Plan: <span style="color:#36b8fa;">Pro</span></div>
+      <div style="margin:7px 0 0 0;">Next payment: <b>June 15, 2025</b></div>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:18px;">
+      <div style="background:#f8fafc;border-radius:13px;box-shadow:0 2px 10px #2176ff0d;padding:22px 17px 20px 17px;min-width:150px;flex:1;">
+        <div style="font-weight:700;color:#174b9f;font-size:1.09rem;margin-bottom:7px;">Free</div>
+        <div style="font-size:1.22rem;color:#2176ff;font-weight:800;margin-bottom:4px;">$0</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">1 job/month</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Basic AI match</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Standard support</div>
+        <button class="nav-btn" onclick="alert('Downgraded to Free!')">Downgrade</button>
+      </div>
+      <div style="background:#f8fafc;border-radius:13px;box-shadow:0 2px 10px #2176ff0d;padding:22px 17px 20px 17px;min-width:150px;flex:1;border:2.5px solid #2176ff;">
+        <div style="color:#36b8fa;font-size:0.97rem;font-weight:700;margin-bottom:2px;">Best Value</div>
+        <div style="font-weight:700;color:#174b9f;font-size:1.09rem;margin-bottom:7px;">Pro</div>
+        <div style="font-size:1.22rem;color:#2176ff;font-weight:800;margin-bottom:4px;">$29/mo</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Unlimited jobs</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Priority AI match</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Premium support 24/7</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Featured listings</div>
+        <button class="nav-btn" onclick="alert('Already on Pro!')">Current Plan</button>
+      </div>
+      <div style="background:#f8fafc;border-radius:13px;box-shadow:0 2px 10px #2176ff0d;padding:22px 17px 20px 17px;min-width:150px;flex:1;">
+        <div style="font-weight:700;color:#174b9f;font-size:1.09rem;margin-bottom:7px;">Enterprise</div>
+        <div style="font-size:1.22rem;color:#2176ff;font-weight:800;margin-bottom:4px;">Custom</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Account manager</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">API integrations</div>
+        <div style="font-size:0.98rem;color:#4a5c76;margin-bottom:3px;">Bulk hiring tools</div>
+        <button class="nav-btn" onclick="alert('Contacting sales...')">Contact Sales</button>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:12px;padding:20px;margin-bottom:18px;">
+      <div style="font-weight:700;color:#2176ff;font-size:1.06rem;margin-bottom:7px;">Billing History</div>
+      <table style="width:100%;border-collapse:collapse;font-size:0.97rem;">
+        <tr><th style="text-align:left;background:#f0f6fd;">Date</th><th style="text-align:left;background:#f0f6fd;">Plan</th><th style="text-align:left;background:#f0f6fd;">Amount</th><th style="text-align:left;background:#f0f6fd;">Status</th></tr>
+        <tr><td>2025-05-15</td><td>Pro</td><td>$29</td><td style="color:#0e8c48;">Paid</td></tr>
+        <tr><td>2025-04-15</td><td>Pro</td><td>$29</td><td style="color:#0e8c48;">Paid</td></tr>
+        <tr><td>2025-03-15</td><td>Pro</td><td>$29</td><td style="color:#0e8c48;">Paid</td></tr>
+      </table>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+        <span>Need to cancel your subscription?</span>
+        <button class="nav-btn" style="background:#ffeaea;color:#db3a34;" onclick="alert('Subscription cancelled!')">Cancel Subscription</button>
+      </div>
+    </div>
+    <div style="margin:24px 0 0 0;">
+      <div style="color:#2176ff;font-weight:700;font-size:1.07rem;margin-bottom:8px;">Frequently Asked Questions</div>
+<div style="font-size:0.98rem;color:#243548;">
+        <b>Q:</b> Can I upgrade/downgrade at any time?<br>
+        <b>A:</b> Yes! Plan changes are instant and pro-rated.<br><br>
+        <b>Q:</b> Is payment secure?<br>
+        <b>A:</b> 100% PCI-compliant and SSL encrypted.<br><br>
+        <b>Q:</b> When will I be charged next?<br>
+        <b>A:</b> On your next billing date shown above.<br>
+      </div>
+    </div>
+  </section>
+  <footer style="margin-top:44px;text-align:center;font-size:1.01rem;color:#a2adc2;padding-bottom:30px;">
+    <div class="xwork-logo" style="font-size:1.3rem;">Xwork</div>
+    <div>Connecting talent with opportunity, worldwide.</div>
+    <div style="margin-top:7px;">&copy; 2025 Xwork. Created by <b>LVS PRIVATE LIMITED CORPORATION</b>. All rights reserved.</div>
+  </footer>
+
